@@ -9,7 +9,6 @@ import (
 	"log"
 	"os"
 	"regexp"
-	"strings"
 )
 
 func main() {
@@ -41,7 +40,7 @@ func main() {
 		}
 		req := request.FuriganaApiRequest{
 			AppId:      os.Getenv("APP_ID"),
-			Sentence:   line[0],
+			Sentence:   line[1],
 			OutputType: "hiragana",
 		}
 		res, err := client.CallApi(req)
@@ -49,9 +48,10 @@ func main() {
 			log.Fatal("Error fail call api")
 			return
 		}
-		sentence := strings.Replace(req.Sentence, " ", "", -1)
+		//sentence := strings.Replace(req.Sentence, " ", "", -1)
 		converted := regx.ReplaceAllString(res.Converted, "")
-		writer.Write([]string{sentence, converted})
+		query := fmt.Sprintf("UPDATE records SET title_kana = '%s' WHERE ID = %s;", converted, line[0])
+		writer.Write([]string{query})
 	}
 	writer.Flush()
 	fmt.Println("complete")
